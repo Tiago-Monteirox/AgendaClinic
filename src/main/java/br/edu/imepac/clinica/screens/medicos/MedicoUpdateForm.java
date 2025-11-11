@@ -2,33 +2,66 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
  */
-package br.edu.imepac.clinica.screens.especialidades;
+package br.edu.imepac.clinica.screens.medicos;
 
 import br.edu.imepac.clinica.daos.EspecialidadeDao;
+import br.edu.imepac.clinica.daos.MedicoDao;
 import br.edu.imepac.clinica.entidades.Especialidade;
-import br.edu.imepac.clinica.exceptions.CampoObrigatorioException;
+import br.edu.imepac.clinica.entidades.Medico;
 import br.edu.imepac.clinica.screens.BaseScreen;
 import br.edu.imepac.clinica.utils.ConstantesImages;
-import java.util.ArrayList;
 import java.util.List;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.JOptionPane;
 
 /**
  *
  * @author evertonhf
  */
-public class EspecialidadeAddForm extends BaseScreen {
-
-    private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(EspecialidadeAddForm.class.getName());
+public class MedicoUpdateForm extends BaseScreen {
 
     /**
-     * Creates new form EspecialidadeAddForm
+     * Creates new form MedicoUpdateForm
+     *
+     * @param medicoId
      */
-    public EspecialidadeAddForm() {
+    public MedicoUpdateForm(long medicoId) {
         initComponents();
-        setImageIcon(ConstantesImages.ESPECIALIDADE_ADD_FORM, imageIcon);
+        setImageIcon(ConstantesImages.MEDICO_ADD_FORM, imageIcon);
         posicionarTopo(20);
         centralizar();
+
+        loadEspecialidadesInForm();
+
+        loadDataInForm(medicoId);
+    }
+
+    private void loadDataInForm(long medicoId) {
+        MedicoDao medicoDao = new MedicoDao();
+        this.medicoDataForm = medicoDao.buscarPorId(medicoId);
+
+        if (this.medicoDataForm == null) {
+            JOptionPane.showMessageDialog(this, "Registro inválido para atualização!", "Status da operação", JOptionPane.ERROR_MESSAGE);
+            this.dispose();
+        }
+
+        nomeField.setText(this.medicoDataForm.getNome());
+        crmField.setText(this.medicoDataForm.getCrm());
+
+        selecionarEspecialidade(this.medicoDataForm.getEspecialidadeId());
+    }
+
+    public void selecionarEspecialidade(long especialidadeSelecionada) {
+
+        for (int i = 0; i < especialidadesField.getItemCount(); i++) {
+            Especialidade e = especialidadesField.getItemAt(i);
+
+            // Compara pelo ID
+            if (e.getId() == especialidadeSelecionada) {
+                especialidadesField.setSelectedIndex(i);
+                break;
+            }
+        }
     }
 
     /**
@@ -45,24 +78,27 @@ public class EspecialidadeAddForm extends BaseScreen {
         jLabel3 = new javax.swing.JLabel();
         nomeField = new javax.swing.JTextField();
         jLabel4 = new javax.swing.JLabel();
-        descricaoField = new javax.swing.JTextField();
+        crmField = new javax.swing.JTextField();
         salvarBtn = new javax.swing.JButton();
         LimparBtn = new javax.swing.JButton();
         fecharBtn = new javax.swing.JButton();
         jLabel2 = new javax.swing.JLabel();
+        jLabel5 = new javax.swing.JLabel();
+        especialidadesField = new javax.swing.JComboBox<Especialidade>();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
         jLabel1.setFont(new java.awt.Font("Helvetica Neue", 0, 24)); // NOI18N
         jLabel1.setForeground(new java.awt.Color(0, 51, 153));
-        jLabel1.setText("Adicionar nova especialidade");
+        jLabel1.setText("Atualizar Médico");
 
         imageIcon.setText("image-icon");
 
         jLabel3.setFont(new java.awt.Font("Helvetica Neue", 1, 13)); // NOI18N
         jLabel3.setText("Nome");
 
-        jLabel4.setText("Descrição");
+        jLabel4.setFont(new java.awt.Font("Helvetica Neue", 1, 13)); // NOI18N
+        jLabel4.setText("CRM");
 
         salvarBtn.setText("Salvar");
         salvarBtn.addActionListener(new java.awt.event.ActionListener() {
@@ -88,6 +124,11 @@ public class EspecialidadeAddForm extends BaseScreen {
         jLabel2.setForeground(new java.awt.Color(102, 102, 102));
         jLabel2.setText("Labels em negrito indicam campos obrigatórios e devem ser preenchidos");
 
+        jLabel5.setFont(new java.awt.Font("Helvetica Neue", 1, 13)); // NOI18N
+        jLabel5.setText("Especialidade");
+
+        especialidadesField.setEditable(true);
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -108,7 +149,10 @@ public class EspecialidadeAddForm extends BaseScreen {
                                 .addComponent(LimparBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addGap(18, 18, 18)
                                 .addComponent(fecharBtn))
-                            .addComponent(descricaoField, javax.swing.GroupLayout.PREFERRED_SIZE, 396, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                            .addComponent(jLabel5)
+                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                                .addComponent(especialidadesField, javax.swing.GroupLayout.Alignment.LEADING, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(crmField, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 396, Short.MAX_VALUE))))
                     .addComponent(jLabel1)
                     .addComponent(jLabel2))
                 .addContainerGap(36, Short.MAX_VALUE))
@@ -126,19 +170,21 @@ public class EspecialidadeAddForm extends BaseScreen {
                         .addComponent(jLabel3)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(nomeField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(34, 34, 34)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jLabel4)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(descricaoField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 45, Short.MAX_VALUE)
+                        .addComponent(crmField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(jLabel5)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(especialidadesField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 31, Short.MAX_VALUE)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(salvarBtn)
                             .addComponent(LimparBtn)
-                            .addComponent(fecharBtn))
-                        .addGap(22, 22, 22))
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(imageIcon, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addContainerGap())))
+                            .addComponent(fecharBtn)))
+                    .addComponent(imageIcon, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap())
         );
 
         pack();
@@ -149,59 +195,77 @@ public class EspecialidadeAddForm extends BaseScreen {
     }//GEN-LAST:event_fecharBtnActionPerformed
 
     private void salvarBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_salvarBtnActionPerformed
-        try {
 
-            validarCamposObrigatorios();
-
-            Especialidade especialidade = new Especialidade(nomeField.getText(), descricaoField.getText());
-            EspecialidadeDao especialidadeDao = new EspecialidadeDao();
-            boolean status = especialidadeDao.salvar(especialidade);
-
-            if (status == true) {
-                JOptionPane.showMessageDialog(this, "Especialidade cadastrada com sucesso!", "Status da operação", JOptionPane.INFORMATION_MESSAGE);
-            } else {
-                JOptionPane.showMessageDialog(this, "Erro ao cadastrar Especialidade - contate o administrador!", "Status da operação", JOptionPane.ERROR_MESSAGE);
-            }
-
-            limparFormmulario();
-
-        } catch (CampoObrigatorioException ex) {
-            System.getLogger(EspecialidadeAddForm.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
+        if (!campoObrigatoriosValidos()) {
             JOptionPane.showMessageDialog(this, "Campos obrigatórios devem ser preenchidos!", "Status da operação", JOptionPane.ERROR_MESSAGE);
+            return;
         }
+
+        Medico medico = new Medico(this.medicoDataForm.getId(), nomeField.getText(), crmField.getText(), ((Especialidade) especialidadesField.getSelectedItem()).getId());
+        MedicoDao medicoDao = new MedicoDao();
+        boolean status = medicoDao.atualizar(medico);
+
+        if (status == true) {
+            JOptionPane.showMessageDialog(this, "Médico cadastrado com sucesso!", "Status da operação", JOptionPane.INFORMATION_MESSAGE);
+        } else {
+            JOptionPane.showMessageDialog(this, "Erro ao cadastrar Médico - contate o administrador!", "Status da operação", JOptionPane.ERROR_MESSAGE);
+        }
+
+        limparFormmulario();
     }//GEN-LAST:event_salvarBtnActionPerformed
 
     private void LimparBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_LimparBtnActionPerformed
         limparFormmulario();
     }//GEN-LAST:event_LimparBtnActionPerformed
-    
+
     private void limparFormmulario() {
         nomeField.setText("");
-        descricaoField.setText("");
+        crmField.setText("");
     }
 
-    private void validarCamposObrigatorios() throws CampoObrigatorioException {
-        List<String> campos = new ArrayList<>();
-
+    private boolean campoObrigatoriosValidos() {
         if (nomeField.getText().isBlank()) {
-            campos.add("Nome");
+            return false;
+        }
+        if (crmField.getText().isBlank()) {
+            return false;
+        }
+        if (especialidadesField.getSelectedItem() == null) {
+            return false;
+        }
+        return true;
+    }
+
+    private void loadEspecialidadesInForm() {
+        EspecialidadeDao especialidadeDao = new EspecialidadeDao();
+        List<Especialidade> especialidades = especialidadeDao.listarTodos();
+
+        // Cria o modelo do combo
+        DefaultComboBoxModel<Especialidade> modelo = new DefaultComboBoxModel<>();
+
+        // Percorre a lista e adiciona os nomes das especialidades
+        for (Especialidade e : especialidades) {
+            modelo.addElement(e);
         }
 
-        if (!campos.isEmpty()) {
-            throw new CampoObrigatorioException(campos);
-        }
+        // Define o modelo no combobox
+        especialidadesField.setModel(modelo);
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton LimparBtn;
-    private javax.swing.JTextField descricaoField;
+    private javax.swing.JTextField crmField;
+    private javax.swing.JComboBox<Especialidade> especialidadesField;
     private javax.swing.JButton fecharBtn;
     private javax.swing.JLabel imageIcon;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel5;
     private javax.swing.JTextField nomeField;
     private javax.swing.JButton salvarBtn;
     // End of variables declaration//GEN-END:variables
+
+    private Medico medicoDataForm;
 }

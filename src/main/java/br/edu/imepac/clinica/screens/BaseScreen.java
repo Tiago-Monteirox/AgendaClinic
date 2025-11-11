@@ -4,7 +4,9 @@
  */
 package br.edu.imepac.clinica.screens;
 
+import java.awt.Dimension;
 import java.awt.Image;
+import java.awt.Toolkit;
 import java.net.URL;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
@@ -30,6 +32,38 @@ public class BaseScreen extends JFrame {
         } else {
             System.err.println("⚠️ Imagem não encontrada em: images/" + fileName);
         }
+    }
+
+    /**
+     * Ajusta a largura da janela para a largura total da tela, mantendo a
+     * altura atual.
+     */
+    public void ajustarLarguraTela() {
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        this.setSize((int) screenSize.getWidth(), this.getHeight());
+    }
+
+    /**
+     * Centraliza a janela na tela.
+     */
+    public void centralizar() {
+        this.setLocationRelativeTo(null);
+    }
+
+    /**
+     * Posiciona o JFrame horizontalmente centralizado e ajusta a posição
+     * vertical.
+     *
+     * @param distanciaTopo Distância em pixels do topo da tela. Se for 0,
+     * ficará no topo da tela.
+     */
+    public void posicionarTopo(int distanciaTopo) {
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+
+        int x = (screenSize.width - getWidth()) / 2;
+        int y = Math.max(0, distanciaTopo); // evita valores negativos
+
+        setLocation(x, y);
     }
 
 }

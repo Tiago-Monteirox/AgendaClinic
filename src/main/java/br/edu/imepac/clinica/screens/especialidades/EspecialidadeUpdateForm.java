@@ -19,19 +19,20 @@ import javax.swing.JOptionPane;
  */
 public class EspecialidadeUpdateForm extends BaseScreen {
 
-    private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(EspecialidadeUpdateForm.class.getName());
-    private Especialidade especialidadeDataForm;
-
     /**
      * Creates new form EspecialidadeAddForm
+     *
+     * @param idEspecialidade
      */
     public EspecialidadeUpdateForm(long idEspecialidade) {
         initComponents();
+
         setImageIcon(ConstantesImages.ESPECIALIDADE_ADD_FORM, imageIcon);
 
-        loadData(idEspecialidade);
+        posicionarTopo(20);
+        centralizar();
 
-        setDataForm();
+        loadDataInForm(idEspecialidade);
     }
 
     /**
@@ -156,9 +157,9 @@ public class EspecialidadeUpdateForm extends BaseScreen {
 
             validarCamposObrigatorios();
 
-            Especialidade especialidade = new Especialidade(especialidadeDataForm.getId(), nomeField.getText(), descricaoField.getText());
-            EspecialidadeDao especialidadeDao = new EspecialidadeDao();
-            boolean status = especialidadeDao.atualizar(especialidade);
+            Especialidade especialidade = new Especialidade(this.especialidadeDataForm.getId(), nomeField.getText(), descricaoField.getText());
+
+            boolean status = this.especialidadeDao.atualizar(especialidade);
 
             if (status == true) {
                 JOptionPane.showMessageDialog(this, "Especialidade atualizada com sucesso!", "Status da operação", JOptionPane.INFORMATION_MESSAGE);
@@ -166,8 +167,7 @@ public class EspecialidadeUpdateForm extends BaseScreen {
                 JOptionPane.showMessageDialog(this, "Erro ao atualizar a especialidade - contate o administrador!", "Status da operação", JOptionPane.ERROR_MESSAGE);
             }
 
-            limparFormmulario();
-
+            this.dispose();
         } catch (CampoObrigatorioException ex) {
             System.getLogger(EspecialidadeUpdateForm.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
             JOptionPane.showMessageDialog(this, "Campos obrigatórios devem ser preenchidos!", "Status da operação", JOptionPane.ERROR_MESSAGE);
@@ -175,46 +175,8 @@ public class EspecialidadeUpdateForm extends BaseScreen {
     }//GEN-LAST:event_salvarBtnActionPerformed
 
     private void LimparBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_LimparBtnActionPerformed
-        limparFormmulario();
+        this.limparFormmulario();
     }//GEN-LAST:event_LimparBtnActionPerformed
-
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ReflectiveOperationException | javax.swing.UnsupportedLookAndFeelException ex) {
-            logger.log(java.util.logging.Level.SEVERE, null, ex);
-        }
-        //</editor-fold>
-
-        /* Create and display the form */
-        java.awt.EventQueue.invokeLater(() -> new EspecialidadeUpdateForm(1).setVisible(true));
-    }
-
-    // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton LimparBtn;
-    private javax.swing.JTextField descricaoField;
-    private javax.swing.JButton fecharBtn;
-    private javax.swing.JLabel imageIcon;
-    private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel2;
-    private javax.swing.JLabel jLabel3;
-    private javax.swing.JLabel jLabel4;
-    private javax.swing.JTextField nomeField;
-    private javax.swing.JButton salvarBtn;
-    // End of variables declaration//GEN-END:variables
 
     private void limparFormmulario() {
         nomeField.setText("");
@@ -233,18 +195,31 @@ public class EspecialidadeUpdateForm extends BaseScreen {
         }
     }
 
-    private void loadData(long idEspecialidade) {
-        EspecialidadeDao especialidadeDao = new EspecialidadeDao();
-        this.especialidadeDataForm = especialidadeDao.buscarPorId(idEspecialidade);
+    private void loadDataInForm(long idEspecialidade) {
+        this.especialidadeDataForm = this.especialidadeDao.buscarPorId(idEspecialidade);
 
         if (especialidadeDataForm == null) {
             JOptionPane.showMessageDialog(this, "Registro inválido para atualização!", "Status da operação", JOptionPane.ERROR_MESSAGE);
             this.dispose();
         }
-    }
 
-    private void setDataForm() {
         nomeField.setText(especialidadeDataForm.getNome());
         descricaoField.setText(especialidadeDataForm.getDescricao());
     }
+
+    // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton LimparBtn;
+    private javax.swing.JTextField descricaoField;
+    private javax.swing.JButton fecharBtn;
+    private javax.swing.JLabel imageIcon;
+    private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
+    private javax.swing.JTextField nomeField;
+    private javax.swing.JButton salvarBtn;
+    // End of variables declaration//GEN-END:variables
+
+    private Especialidade especialidadeDataForm;
+    private final EspecialidadeDao especialidadeDao = new EspecialidadeDao();
 }
