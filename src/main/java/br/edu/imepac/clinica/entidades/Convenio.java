@@ -1,58 +1,50 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package br.edu.imepac.clinica.entidades;
 
 import br.edu.imepac.clinica.exceptions.ValidationException;
 import br.edu.imepac.clinica.utils.Validators;
 
-/**
- *
- * @author tiago-monteiro
- */
 public class Convenio extends BaseEntity {
-    
-    private String empresa;
-    private String cnpj;
-    private String telefone;
+
+    private String nome;
+    private String codigo;
+    private String descricao;
     private boolean ativo = true;
-   
+
     @Override
     public void validar() throws ValidationException {
-        Validators.notBlank(empresa, "Empresa do convênio");
-        Validators.cnpj(cnpj);
-        Validators.notBlank(telefone, "Telefone do conveniado");
+        Validators.notBlank(nome, "Nome do convênio");
+        Validators.notBlank(codigo, "Código do convênio");
+        // descrição pode ser opcional
     }
-    
-    public String getEmpresa() {
-        return empresa;
+
+    public String getNome() {
+        return nome;
     }
-    
-    public void setEmpresa(String empresa) {
-        this.empresa = empresa;
+
+    public void setNome(String nome) {
+        this.nome = nome;
     }
-    
-    public String getCnpj() {
-        return cnpj;
+
+    public String getCodigo() {
+        return codigo;
     }
-    
-    public void setCnpj(String cnpj) {
-        this.cnpj = cnpj;
+
+    public void setCodigo(String codigo) {
+        this.codigo = codigo;
     }
-    
-    public String getTelefone() {
-        return telefone;
+
+    public String getDescricao() {
+        return descricao;
     }
-    
-    public void setTelefone(String telefone) {
-        this.telefone = telefone;
+
+    public void setDescricao(String descricao) {
+        this.descricao = descricao;
     }
-    
+
     public boolean isAtivo() {
         return ativo;
     }
-    
+
     public void setAtivo(boolean ativo) {
         this.ativo = ativo;
     }
