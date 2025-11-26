@@ -10,11 +10,11 @@ import java.util.List;
  */
 public interface GenericDao<T> {
     
-    void inserir(T entidade) throws SQLException, ValidationException;
+    boolean inserir(T entidade) throws SQLException, ValidationException;
     
-    void atualizar(T entidade) throws SQLException, ValidationException;
+    boolean atualizar(T entidade) throws SQLException, ValidationException;
     
-    void excluir(Long id) throws SQLException;
+    boolean excluir(Long id) throws SQLException;
     
     T buscarPorId(Long id) throws SQLException;
     

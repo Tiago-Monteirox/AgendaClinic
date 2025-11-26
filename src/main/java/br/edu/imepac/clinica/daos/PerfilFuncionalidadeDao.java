@@ -1,19 +1,20 @@
 package br.edu.imepac.clinica.daos;
 
-import br.edu.imepac.clinica.entidades.Especialidade;
+import br.edu.imepac.clinica.entidades.Perfil;
+import br.edu.imepac.clinica.entidades.PerfilFuncionalidade;
 import br.edu.imepac.clinica.exceptions.ValidationException;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class EspecialidadeDao extends BaseDao implements GenericDao<Especialidade> {
+public class PerfilFuncionalidadeDao extends BaseDao implements GenericDao<PerfilFuncionalidade> {
 
     @Override
-    public boolean inserir(Especialidade especialidade) throws SQLException, ValidationException {
-        especialidade.validar();
+    public boolean inserir(PerfilFuncionalidade pf) throws SQLException, ValidationException {
+        pf.validar();
 
-        String sql = "INSERT INTO especialidade (nome, area, descricao) VALUES (?, ?, ?)";
+        String sql = "INSERT INTO perfil_funcionalidade (perfil_id, funcionalidade) VALUES (?, ?)";
 
         Connection conn = null;
         PreparedStatement stmt = null;
@@ -23,17 +24,14 @@ public class EspecialidadeDao extends BaseDao implements GenericDao<Especialidad
             conn = getConnection();
             stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
 
-            stmt.setString(1, especialidade.getNome());
-            stmt.setString(2, especialidade.getArea());
-            stmt.setString(3, especialidade.getDescricao());
+            stmt.setLong(1, pf.getPerfil().getId());
+            stmt.setString(2, pf.getFuncionalidade());
 
             int linhas = stmt.executeUpdate();
-
             rs = stmt.getGeneratedKeys();
             if (rs.next()) {
-                especialidade.setId(rs.getLong(1));
+                pf.setId(rs.getLong(1));
             }
-
             return linhas > 0;
 
         } finally {
@@ -42,10 +40,10 @@ public class EspecialidadeDao extends BaseDao implements GenericDao<Especialidad
     }
 
     @Override
-    public boolean atualizar(Especialidade especialidade) throws SQLException, ValidationException {
-        especialidade.validar();
+    public boolean atualizar(PerfilFuncionalidade pf) throws SQLException, ValidationException {
+        pf.validar();
 
-        String sql = "UPDATE especialidade SET nome = ?, area = ?, descricao = ? WHERE id = ?";
+        String sql = "UPDATE perfil_funcionalidade SET perfil_id = ?, funcionalidade = ? WHERE id = ?";
 
         Connection conn = null;
         PreparedStatement stmt = null;
@@ -54,10 +52,9 @@ public class EspecialidadeDao extends BaseDao implements GenericDao<Especialidad
             conn = getConnection();
             stmt = conn.prepareStatement(sql);
 
-            stmt.setString(1, especialidade.getNome());
-            stmt.setString(2, especialidade.getArea());
-            stmt.setString(3, especialidade.getDescricao());
-            stmt.setLong(4, especialidade.getId());
+            stmt.setLong(1, pf.getPerfil().getId());
+            stmt.setString(2, pf.getFuncionalidade());
+            stmt.setLong(3, pf.getId());
 
             int linhas = stmt.executeUpdate();
             return linhas > 0;
@@ -69,7 +66,7 @@ public class EspecialidadeDao extends BaseDao implements GenericDao<Especialidad
 
     @Override
     public boolean excluir(Long id) throws SQLException {
-        String sql = "DELETE FROM especialidade WHERE id = ?";
+        String sql = "DELETE FROM perfil_funcionalidade WHERE id = ?";
 
         Connection conn = null;
         PreparedStatement stmt = null;
@@ -87,8 +84,8 @@ public class EspecialidadeDao extends BaseDao implements GenericDao<Especialidad
     }
 
     @Override
-    public Especialidade buscarPorId(Long id) throws SQLException {
-        String sql = "SELECT id, nome, area, descricao FROM especialidade WHERE id = ?";
+    public PerfilFuncionalidade buscarPorId(Long id) throws SQLException {
+        String sql = "SELECT id, perfil_id, funcionalidade FROM perfil_funcionalidade WHERE id = ?";
 
         Connection conn = null;
         PreparedStatement stmt = null;
@@ -101,12 +98,15 @@ public class EspecialidadeDao extends BaseDao implements GenericDao<Especialidad
             rs = stmt.executeQuery();
 
             if (rs.next()) {
-                Especialidade e = new Especialidade();
-                e.setId(rs.getLong("id"));
-                e.setNome(rs.getString("nome"));
-                e.setArea(rs.getString("area"));
-                e.setDescricao(rs.getString("descricao"));
-                return e;
+                PerfilFuncionalidade pf = new PerfilFuncionalidade();
+                pf.setId(rs.getLong("id"));
+
+                Perfil p = new Perfil();
+                p.setId(rs.getLong("perfil_id"));
+                pf.setPerfil(p);
+
+                pf.setFuncionalidade(rs.getString("funcionalidade"));
+                return pf;
             }
             return null;
 
@@ -116,14 +116,14 @@ public class EspecialidadeDao extends BaseDao implements GenericDao<Especialidad
     }
 
     @Override
-    public List<Especialidade> listarTodos() throws SQLException {
-        String sql = "SELECT id, nome, area, descricao FROM especialidade";
+    public List<PerfilFuncionalidade> listarTodos() throws SQLException {
+        String sql = "SELECT id, perfil_id, funcionalidade FROM perfil_funcionalidade";
 
         Connection conn = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
 
-        List<Especialidade> lista = new ArrayList<>();
+        List<PerfilFuncionalidade> lista = new ArrayList<>();
 
         try {
             conn = getConnection();
@@ -131,12 +131,15 @@ public class EspecialidadeDao extends BaseDao implements GenericDao<Especialidad
             rs = stmt.executeQuery();
 
             while (rs.next()) {
-                Especialidade e = new Especialidade();
-                e.setId(rs.getLong("id"));
-                e.setNome(rs.getString("nome"));
-                e.setArea(rs.getString("area"));
-                e.setDescricao(rs.getString("descricao"));
-                lista.add(e);
+                PerfilFuncionalidade pf = new PerfilFuncionalidade();
+                pf.setId(rs.getLong("id"));
+
+                Perfil p = new Perfil();
+                p.setId(rs.getLong("perfil_id"));
+                pf.setPerfil(p);
+
+                pf.setFuncionalidade(rs.getString("funcionalidade"));
+                lista.add(pf);
             }
             return lista;
 
@@ -145,10 +148,10 @@ public class EspecialidadeDao extends BaseDao implements GenericDao<Especialidad
         }
     }
 
-    public boolean salvar(Especialidade especialidade) throws SQLException, ValidationException {
-        if (especialidade.getId() == null) {
-            return inserir(especialidade);
+    public boolean salvar(PerfilFuncionalidade pf) throws SQLException, ValidationException {
+        if (pf.getId() == null) {
+            return inserir(pf);
         }
-        return atualizar(especialidade);
+        return atualizar(pf);
     }
 }

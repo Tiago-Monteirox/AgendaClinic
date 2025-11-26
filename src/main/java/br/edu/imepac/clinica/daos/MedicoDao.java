@@ -13,7 +13,7 @@ public class MedicoDao extends BaseDao implements GenericDao<Medico> {
     private final EspecialidadeDao especialidadeDao = new EspecialidadeDao();
 
     @Override
-    public void inserir(Medico medico) throws SQLException, ValidationException {
+    public boolean inserir(Medico medico) throws SQLException, ValidationException {
         medico.validar();
 
         String sql = "INSERT INTO medico " +
@@ -37,12 +37,14 @@ public class MedicoDao extends BaseDao implements GenericDao<Medico> {
             stmt.setLong(7, medico.getEspecialidade().getId());
             stmt.setBoolean(8, medico.isAtivo());
 
-            stmt.executeUpdate();
+            int linhas = stmt.executeUpdate();
 
             rs = stmt.getGeneratedKeys();
             if (rs.next()) {
                 medico.setId(rs.getLong(1));
             }
+
+            return linhas > 0;
 
         } finally {
             fecharRecursos(conn, stmt, rs);
@@ -50,7 +52,7 @@ public class MedicoDao extends BaseDao implements GenericDao<Medico> {
     }
 
     @Override
-    public void atualizar(Medico medico) throws SQLException, ValidationException {
+    public boolean atualizar(Medico medico) throws SQLException, ValidationException {
         medico.validar();
 
         String sql = "UPDATE medico SET " +
@@ -75,7 +77,8 @@ public class MedicoDao extends BaseDao implements GenericDao<Medico> {
             stmt.setBoolean(8, medico.isAtivo());
             stmt.setLong(9, medico.getId());
 
-            stmt.executeUpdate();
+            int linhas = stmt.executeUpdate();
+            return linhas > 0;
 
         } finally {
             fecharRecursos(conn, stmt);
@@ -83,7 +86,7 @@ public class MedicoDao extends BaseDao implements GenericDao<Medico> {
     }
 
     @Override
-    public void excluir(Long id) throws SQLException {
+    public boolean excluir(Long id) throws SQLException {
         String sql = "DELETE FROM medico WHERE id = ?";
 
         Connection conn = null;
@@ -93,7 +96,9 @@ public class MedicoDao extends BaseDao implements GenericDao<Medico> {
             conn = getConnection();
             stmt = conn.prepareStatement(sql);
             stmt.setLong(1, id);
-            stmt.executeUpdate();
+            int linhas = stmt.executeUpdate();
+            return linhas > 0;
+
         } finally {
             fecharRecursos(conn, stmt);
         }
@@ -168,5 +173,12 @@ public class MedicoDao extends BaseDao implements GenericDao<Medico> {
         m.setEspecialidade(esp);
 
         return m;
+    }
+
+    public boolean salvar(Medico medico) throws SQLException, ValidationException {
+        if (medico.getId() == null) {
+            return inserir(medico);
+        }
+        return atualizar(medico);
     }
 }

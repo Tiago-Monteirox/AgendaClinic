@@ -10,7 +10,7 @@ import java.util.List;
 public class ConvenioDao extends BaseDao implements GenericDao<Convenio> {
 
     @Override
-    public void inserir(Convenio convenio) throws SQLException, ValidationException {
+    public boolean inserir(Convenio convenio) throws SQLException, ValidationException {
         convenio.validar();
 
         String sql = "INSERT INTO convenio (nome, codigo, descricao, ativo) " +
@@ -29,12 +29,14 @@ public class ConvenioDao extends BaseDao implements GenericDao<Convenio> {
             stmt.setString(3, convenio.getDescricao());
             stmt.setBoolean(4, convenio.isAtivo());
 
-            stmt.executeUpdate();
+            int linhas = stmt.executeUpdate();
 
             rs = stmt.getGeneratedKeys();
             if (rs.next()) {
                 convenio.setId(rs.getLong(1));
             }
+
+            return linhas > 0;
 
         } finally {
             fecharRecursos(conn, stmt, rs);
@@ -42,7 +44,7 @@ public class ConvenioDao extends BaseDao implements GenericDao<Convenio> {
     }
 
     @Override
-    public void atualizar(Convenio convenio) throws SQLException, ValidationException {
+    public boolean atualizar(Convenio convenio) throws SQLException, ValidationException {
         convenio.validar();
 
         String sql = "UPDATE convenio SET nome = ?, codigo = ?, descricao = ?, ativo = ? " +
@@ -61,7 +63,8 @@ public class ConvenioDao extends BaseDao implements GenericDao<Convenio> {
             stmt.setBoolean(4, convenio.isAtivo());
             stmt.setLong(5, convenio.getId());
 
-            stmt.executeUpdate();
+            int linhas = stmt.executeUpdate();
+            return linhas > 0;
 
         } finally {
             fecharRecursos(conn, stmt);
@@ -69,7 +72,7 @@ public class ConvenioDao extends BaseDao implements GenericDao<Convenio> {
     }
 
     @Override
-    public void excluir(Long id) throws SQLException {
+    public boolean excluir(Long id) throws SQLException {
         String sql = "DELETE FROM convenio WHERE id = ?";
 
         Connection conn = null;
@@ -79,7 +82,8 @@ public class ConvenioDao extends BaseDao implements GenericDao<Convenio> {
             conn = getConnection();
             stmt = conn.prepareStatement(sql);
             stmt.setLong(1, id);
-            stmt.executeUpdate();
+            int linhas = stmt.executeUpdate();
+            return linhas > 0;
 
         } finally {
             fecharRecursos(conn, stmt);
@@ -146,5 +150,13 @@ public class ConvenioDao extends BaseDao implements GenericDao<Convenio> {
         } finally {
             fecharRecursos(conn, stmt, rs);
         }
+    }
+
+    // opcional, se quiser manter padrão salvar()
+    public boolean salvar(Convenio convenio) throws SQLException, ValidationException {
+        if (convenio.getId() == null) {
+            return inserir(convenio);
+        }
+        return atualizar(convenio);
     }
 }
