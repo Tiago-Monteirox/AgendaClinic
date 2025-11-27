@@ -3,38 +3,25 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package br.edu.imepac.clinica.entidades;
+import br.edu.imepac.clinica.exceptions.ValidationException;
+import br.edu.imepac.clinica.utils.Validators;
 
 /**
  *
  * @author evertonhf
  */
-public class Especialidade {
-
-    private long id;
+public class Especialidade extends BaseEntity{
+    
     private String nome;
+    private String area;
     private String descricao;
-
-    public Especialidade() {
+    
+    @Override
+    public void validar() throws ValidationException {
+        Validators.notBlank(nome, "Nome da especialidade");
+        Validators.notBlank(descricao, "Descrição da especialidade");
     }
-
-    public Especialidade(long id, String nome, String descricao) {
-        this.id = id;
-        this.nome = nome;
-        this.descricao = descricao;
-    }
-
-    public Especialidade(String nome, String descricao) {
-        this.nome = nome;
-        this.descricao = descricao;
-    }
-
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
-    }
+    
 
     public String getNome() {
         return nome;
@@ -44,17 +31,20 @@ public class Especialidade {
         this.nome = nome;
     }
 
+    public String getArea() {
+        return area;
+    }
+
+    public void setArea(String area) {
+        this.area = area;
+    }
+
     public String getDescricao() {
         return descricao;
     }
 
     public void setDescricao(String descricao) {
         this.descricao = descricao;
-    }
-
-    @Override
-    public String toString() {
-        return nome;
     }
 
 }

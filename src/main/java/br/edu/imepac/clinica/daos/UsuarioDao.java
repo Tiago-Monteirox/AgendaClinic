@@ -231,4 +231,30 @@ public class UsuarioDao extends BaseDao implements GenericDao<Usuario> {
         }
         return atualizar(usuario);
     }
+
+    // === usado pelo AuthService no login ===
+    public Usuario buscarPorLogin(String nomeLogin) throws SQLException {
+        String sql = "SELECT id, nome_login, senha, status, ultimo_login, bloqueado, " +
+                     "tentativas_falhas, secretaria_id, perfil_id " +
+                     "FROM usuario WHERE nome_login = ?";
+
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+
+        try {
+            conn = getConnection();
+            stmt = conn.prepareStatement(sql);
+            stmt.setString(1, nomeLogin);
+            rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                return mapearUsuario(rs);
+            }
+            return null;
+
+        } finally {
+            fecharRecursos(conn, stmt, rs);
+        }
+    }
 }

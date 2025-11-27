@@ -1,60 +1,30 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package br.edu.imepac.clinica.entidades;
 
-/**
- *
- * @author evertonhf
- */
-public class Medico {
+import br.edu.imepac.clinica.exceptions.ValidationException;
+import br.edu.imepac.clinica.utils.Validators;
 
-    private long id;
-    private String nome;
+public class Medico extends Pessoa {
+
     private String crm;
-
-    private long especialidadeId;
+    private int tempoExperiencia; // em anos
+    private String formacao;
     private Especialidade especialidade;
+    private boolean ativo = true;
 
-    public Medico() {
-    }
+    @Override
+    public void validar() throws ValidationException {
+        super.validar();
+        Validators.notBlank(crm, "CRM");
 
-    public Medico(String nome, String crm, Especialidade especialidade) {
-        this(nome, crm, especialidade.getId());
-    }
+        if (tempoExperiencia < 0) {
+            throw new ValidationException("Tempo de experiência não pode ser negativo");
+        }
 
-    public Medico(String nome, String crm, long especialidadeId) {
-        this.nome = nome;
-        this.crm = crm;
-        this.especialidadeId = especialidadeId;
-    }
+        if (especialidade == null) {
+            throw new ValidationException("Especialidade é obrigatória");
+        }
 
-    public Medico(long id, String nome, String crm, long especialidadeId) {
-        this.id = id;
-        this.nome = nome;
-        this.crm = crm;
-        this.especialidadeId = especialidadeId;
-    }
-
-    public Medico(long id, String nome, String crm, Especialidade especialidade) {
-        this(id, nome, crm, especialidade.getId());
-    }
-
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
-    }
-
-    public String getNome() {
-        return nome;
-    }
-
-    public void setNome(String nome) {
-        this.nome = nome;
+        especialidade.validar();
     }
 
     public String getCrm() {
@@ -65,12 +35,20 @@ public class Medico {
         this.crm = crm;
     }
 
-    public long getEspecialidadeId() {
-        return especialidadeId;
+    public int getTempoExperiencia() {
+        return tempoExperiencia;
     }
 
-    public void setEspecialidadeId(long especialidadeId) {
-        this.especialidadeId = especialidadeId;
+    public void setTempoExperiencia(int tempoExperiencia) {
+        this.tempoExperiencia = tempoExperiencia;
+    }
+
+    public String getFormacao() {
+        return formacao;
+    }
+
+    public void setFormacao(String formacao) {
+        this.formacao = formacao;
     }
 
     public Especialidade getEspecialidade() {
@@ -81,8 +59,11 @@ public class Medico {
         this.especialidade = especialidade;
     }
 
-    @Override
-    public String toString() {
-        return nome;
+    public boolean isAtivo() {
+        return ativo;
+    }
+
+    public void setAtivo(boolean ativo) {
+        this.ativo = ativo;
     }
 }
