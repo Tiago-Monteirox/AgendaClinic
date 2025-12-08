@@ -8,14 +8,14 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ProntuarioDao extends BaseDao implements GenericDao<Prontuario> {
+public class ProntuarioDao extends BaseDao {
 
-    @Override
-    public boolean inserir(Prontuario prontuario) throws SQLException, ValidationException {
-        prontuario.validar();
+    public boolean inserir(Prontuario p) throws SQLException, ValidationException {
+        p.validar();
 
-        String sql = "INSERT INTO prontuario (resumo, anotacoes, arquivo_pdf, consulta_id) " +
-                     "VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO prontuario " +
+                "(consulta_id, resumo, anotacoes, arquivo_pdf) " +
+                "VALUES (?, ?, ?, ?)";
 
         Connection conn = null;
         PreparedStatement stmt = null;
@@ -25,15 +25,15 @@ public class ProntuarioDao extends BaseDao implements GenericDao<Prontuario> {
             conn = getConnection();
             stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
 
-            stmt.setString(1, prontuario.getResumo());
-            stmt.setString(2, prontuario.getAnotacoes());
-            stmt.setString(3, prontuario.getArquivoPdf());
-            stmt.setLong(4, prontuario.getConsulta().getId());
+            stmt.setLong(1, p.getConsulta().getId());
+            stmt.setString(2, p.getResumo());
+            stmt.setString(3, p.getAnotacoes());
+            stmt.setString(4, p.getArquivoPdf());
 
             int linhas = stmt.executeUpdate();
             rs = stmt.getGeneratedKeys();
             if (rs.next()) {
-                prontuario.setId(rs.getLong(1));
+                p.setId(rs.getLong(1));
             }
             return linhas > 0;
 
@@ -42,12 +42,12 @@ public class ProntuarioDao extends BaseDao implements GenericDao<Prontuario> {
         }
     }
 
-    @Override
-    public boolean atualizar(Prontuario prontuario) throws SQLException, ValidationException {
-        prontuario.validar();
+    public boolean atualizar(Prontuario p) throws SQLException, ValidationException {
+        p.validar();
 
-        String sql = "UPDATE prontuario SET resumo = ?, anotacoes = ?, arquivo_pdf = ?, " +
-                     "consulta_id = ? WHERE id = ?";
+        String sql = "UPDATE prontuario SET " +
+                "resumo = ?, anotacoes = ?, arquivo_pdf = ? " +
+                "WHERE id = ?";
 
         Connection conn = null;
         PreparedStatement stmt = null;
@@ -56,11 +56,10 @@ public class ProntuarioDao extends BaseDao implements GenericDao<Prontuario> {
             conn = getConnection();
             stmt = conn.prepareStatement(sql);
 
-            stmt.setString(1, prontuario.getResumo());
-            stmt.setString(2, prontuario.getAnotacoes());
-            stmt.setString(3, prontuario.getArquivoPdf());
-            stmt.setLong(4, prontuario.getConsulta().getId());
-            stmt.setLong(5, prontuario.getId());
+            stmt.setString(1, p.getResumo());
+            stmt.setString(2, p.getAnotacoes());
+            stmt.setString(3, p.getArquivoPdf());
+            stmt.setLong(4, p.getId());
 
             int linhas = stmt.executeUpdate();
             return linhas > 0;
@@ -70,28 +69,32 @@ public class ProntuarioDao extends BaseDao implements GenericDao<Prontuario> {
         }
     }
 
-    @Override
-    public boolean excluir(Long id) throws SQLException {
-        String sql = "DELETE FROM prontuario WHERE id = ?";
+    public Prontuario buscarPorConsultaId(Long consultaId) throws SQLException {
+        String sql = "SELECT id, consulta_id, resumo, anotacoes, arquivo_pdf " +
+                     "FROM prontuario WHERE consulta_id = ?";
 
         Connection conn = null;
         PreparedStatement stmt = null;
+        ResultSet rs = null;
 
         try {
             conn = getConnection();
             stmt = conn.prepareStatement(sql);
-            stmt.setLong(1, id);
-            int linhas = stmt.executeUpdate();
-            return linhas > 0;
+            stmt.setLong(1, consultaId);
+            rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                return mapearProntuario(rs);
+            }
+            return null;
 
         } finally {
-            fecharRecursos(conn, stmt);
+            fecharRecursos(conn, stmt, rs);
         }
     }
 
-    @Override
     public Prontuario buscarPorId(Long id) throws SQLException {
-        String sql = "SELECT id, resumo, anotacoes, arquivo_pdf, consulta_id " +
+        String sql = "SELECT id, consulta_id, resumo, anotacoes, arquivo_pdf " +
                      "FROM prontuario WHERE id = ?";
 
         Connection conn = null;
@@ -114,23 +117,42 @@ public class ProntuarioDao extends BaseDao implements GenericDao<Prontuario> {
         }
     }
 
-    @Override
-    public List<Prontuario> listarTodos() throws SQLException {
-        String sql = "SELECT id, resumo, anotacoes, arquivo_pdf, consulta_id FROM prontuario";
+    /**
+     * US-13: listar prontuários por paciente.
+     * Aqui já traz consulta (com data_hora) associada, para facilitar tela de histórico.
+     */
+    public List<Prontuario> listarPorPaciente(Long pacienteId) throws SQLException {
+        String sql = "SELECT pr.id, pr.consulta_id, pr.resumo, pr.anotacoes, pr.arquivo_pdf, " +
+                "       c.data_hora " +
+                "FROM prontuario pr " +
+                "JOIN consulta c ON c.id = pr.consulta_id " +
+                "WHERE c.paciente_id = ? " +
+                "ORDER BY c.data_hora DESC";
 
         Connection conn = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
-
         List<Prontuario> lista = new ArrayList<>();
 
         try {
             conn = getConnection();
             stmt = conn.prepareStatement(sql);
+            stmt.setLong(1, pacienteId);
             rs = stmt.executeQuery();
 
             while (rs.next()) {
-                lista.add(mapearProntuario(rs));
+                Prontuario p = mapearProntuario(rs);
+
+                // monta a consulta básica associada
+                Consulta c = new Consulta();
+                c.setId(rs.getLong("consulta_id"));
+                Timestamp ts = rs.getTimestamp("data_hora");
+                if (ts != null) {
+                    c.setDataHora(ts.toLocalDateTime());
+                }
+                p.setConsulta(c);
+
+                lista.add(p);
             }
             return lista;
 
@@ -142,21 +164,18 @@ public class ProntuarioDao extends BaseDao implements GenericDao<Prontuario> {
     private Prontuario mapearProntuario(ResultSet rs) throws SQLException {
         Prontuario p = new Prontuario();
         p.setId(rs.getLong("id"));
+
+        Long consultaId = rs.getLong("consulta_id");
+        if (!rs.wasNull()) {
+            Consulta c = new Consulta();
+            c.setId(consultaId);
+            p.setConsulta(c);
+        }
+
         p.setResumo(rs.getString("resumo"));
         p.setAnotacoes(rs.getString("anotacoes"));
         p.setArquivoPdf(rs.getString("arquivo_pdf"));
 
-        Consulta c = new Consulta();
-        c.setId(rs.getLong("consulta_id"));
-        p.setConsulta(c);
-
         return p;
-    }
-
-    public boolean salvar(Prontuario prontuario) throws SQLException, ValidationException {
-        if (prontuario.getId() == null) {
-            return inserir(prontuario);
-        }
-        return atualizar(prontuario);
     }
 }

@@ -7,16 +7,20 @@ public class Prontuario extends BaseEntity {
 
     private String resumo;
     private String anotacoes;
-    private String arquivoPdf; // caminho no disco ou nome do arquivo
+    private String arquivoPdf;
+
     private Consulta consulta;
 
     @Override
     public void validar() throws ValidationException {
-        if (consulta == null) {
-            throw new ValidationException("Consulta associada é obrigatória");
+        if (consulta == null || consulta.getId() == null) {
+            throw new ValidationException("Consulta é obrigatória no prontuário.");
         }
+        // campo obrigatório segundo o modelo: resumo
         Validators.notBlank(resumo, "Resumo do prontuário");
     }
+
+    // ===== getters/setters =====
 
     public String getResumo() {
         return resumo;

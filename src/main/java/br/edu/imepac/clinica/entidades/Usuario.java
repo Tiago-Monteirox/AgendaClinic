@@ -18,6 +18,9 @@ public class Usuario extends BaseEntity {
     private Secretaria secretaria;
     private Perfil perfil;
 
+    // novo: vínculo com médico (para login de médico)
+    private Medico medico;
+
     // ============================================================
     // Validação de entidade
     // ============================================================
@@ -29,6 +32,7 @@ public class Usuario extends BaseEntity {
         if (perfil == null) {
             throw new ValidationException("Perfil do usuário é obrigatório.");
         }
+        // médico é opcional (usuário pode ser secretaria, admin, etc.), então não força aqui
     }
 
     // ============================================================
@@ -114,6 +118,15 @@ public class Usuario extends BaseEntity {
 
     public void setPerfil(Perfil perfil) {
         this.perfil = perfil;
+    }
+
+    // novo: médico associado ao usuário (para agenda/prontuário)
+    public Medico getMedico() {
+        return medico;
+    }
+
+    public void setMedico(Medico medico) {
+        this.medico = medico;
     }
 
     // ============================================================

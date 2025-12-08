@@ -55,4 +55,10 @@ public class Perfil extends BaseEntity {
     public void setFuncionalidades(List<PerfilFuncionalidade> funcionalidades) {
         this.funcionalidades = funcionalidades;
     }
+    
+@Override
+public String toString() {
+    return getNome() + " (nível " + getNivelAcesso() + ")";
+}
+
 }

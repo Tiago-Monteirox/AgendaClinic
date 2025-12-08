@@ -1,5 +1,6 @@
 package br.edu.imepac.clinica.daos;
 
+import br.edu.imepac.clinica.entidades.Medico;
 import br.edu.imepac.clinica.entidades.Perfil;
 import br.edu.imepac.clinica.entidades.Secretaria;
 import br.edu.imepac.clinica.entidades.Usuario;
@@ -17,8 +18,9 @@ public class UsuarioDao extends BaseDao implements GenericDao<Usuario> {
         usuario.validar();
 
         String sql = "INSERT INTO usuario " +
-                "(nome_login, senha, status, ultimo_login, bloqueado, tentativas_falhas, secretaria_id, perfil_id) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+                "(nome_login, senha, status, ultimo_login, bloqueado, tentativas_falhas, " +
+                " secretaria_id, perfil_id, medico_id) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         Connection conn = null;
         PreparedStatement stmt = null;
@@ -43,17 +45,24 @@ public class UsuarioDao extends BaseDao implements GenericDao<Usuario> {
             stmt.setInt(6, usuario.getTentativasFalhas());
 
             if (usuario.getSecretaria() != null &&
-                usuario.getSecretaria().getId() != null) {
+                    usuario.getSecretaria().getId() != null) {
                 stmt.setLong(7, usuario.getSecretaria().getId());
             } else {
                 stmt.setNull(7, Types.BIGINT);
             }
 
             if (usuario.getPerfil() != null &&
-                usuario.getPerfil().getId() != null) {
+                    usuario.getPerfil().getId() != null) {
                 stmt.setLong(8, usuario.getPerfil().getId());
             } else {
                 stmt.setNull(8, Types.BIGINT);
+            }
+
+            if (usuario.getMedico() != null &&
+                    usuario.getMedico().getId() != null) {
+                stmt.setLong(9, usuario.getMedico().getId());
+            } else {
+                stmt.setNull(9, Types.BIGINT);
             }
 
             int linhas = stmt.executeUpdate();
@@ -74,7 +83,7 @@ public class UsuarioDao extends BaseDao implements GenericDao<Usuario> {
 
         String sql = "UPDATE usuario SET " +
                 "nome_login = ?, senha = ?, status = ?, ultimo_login = ?, " +
-                "bloqueado = ?, tentativas_falhas = ?, secretaria_id = ?, perfil_id = ? " +
+                "bloqueado = ?, tentativas_falhas = ?, secretaria_id = ?, perfil_id = ?, medico_id = ? " +
                 "WHERE id = ?";
 
         Connection conn = null;
@@ -99,20 +108,27 @@ public class UsuarioDao extends BaseDao implements GenericDao<Usuario> {
             stmt.setInt(6, usuario.getTentativasFalhas());
 
             if (usuario.getSecretaria() != null &&
-                usuario.getSecretaria().getId() != null) {
+                    usuario.getSecretaria().getId() != null) {
                 stmt.setLong(7, usuario.getSecretaria().getId());
             } else {
                 stmt.setNull(7, Types.BIGINT);
             }
 
             if (usuario.getPerfil() != null &&
-                usuario.getPerfil().getId() != null) {
+                    usuario.getPerfil().getId() != null) {
                 stmt.setLong(8, usuario.getPerfil().getId());
             } else {
                 stmt.setNull(8, Types.BIGINT);
             }
 
-            stmt.setLong(9, usuario.getId());
+            if (usuario.getMedico() != null &&
+                    usuario.getMedico().getId() != null) {
+                stmt.setLong(9, usuario.getMedico().getId());
+            } else {
+                stmt.setNull(9, Types.BIGINT);
+            }
+
+            stmt.setLong(10, usuario.getId());
 
             int linhas = stmt.executeUpdate();
             return linhas > 0;
@@ -144,8 +160,8 @@ public class UsuarioDao extends BaseDao implements GenericDao<Usuario> {
     @Override
     public Usuario buscarPorId(Long id) throws SQLException {
         String sql = "SELECT id, nome_login, senha, status, ultimo_login, bloqueado, " +
-                     "tentativas_falhas, secretaria_id, perfil_id " +
-                     "FROM usuario WHERE id = ?";
+                "tentativas_falhas, secretaria_id, perfil_id, medico_id " +
+                "FROM usuario WHERE id = ?";
 
         Connection conn = null;
         PreparedStatement stmt = null;
@@ -170,7 +186,8 @@ public class UsuarioDao extends BaseDao implements GenericDao<Usuario> {
     @Override
     public List<Usuario> listarTodos() throws SQLException {
         String sql = "SELECT id, nome_login, senha, status, ultimo_login, bloqueado, " +
-                     "tentativas_falhas, secretaria_id, perfil_id FROM usuario";
+                "tentativas_falhas, secretaria_id, perfil_id, medico_id " +
+                "FROM usuario";
 
         Connection conn = null;
         PreparedStatement stmt = null;
@@ -222,6 +239,13 @@ public class UsuarioDao extends BaseDao implements GenericDao<Usuario> {
             u.setPerfil(p);
         }
 
+        Long medicoId = rs.getLong("medico_id");
+        if (!rs.wasNull()) {
+            Medico m = new Medico();
+            m.setId(medicoId);
+            u.setMedico(m);
+        }
+
         return u;
     }
 
@@ -235,8 +259,8 @@ public class UsuarioDao extends BaseDao implements GenericDao<Usuario> {
     // === usado pelo AuthService no login ===
     public Usuario buscarPorLogin(String nomeLogin) throws SQLException {
         String sql = "SELECT id, nome_login, senha, status, ultimo_login, bloqueado, " +
-                     "tentativas_falhas, secretaria_id, perfil_id " +
-                     "FROM usuario WHERE nome_login = ?";
+                "tentativas_falhas, secretaria_id, perfil_id, medico_id " +
+                "FROM usuario WHERE nome_login = ?";
 
         Connection conn = null;
         PreparedStatement stmt = null;

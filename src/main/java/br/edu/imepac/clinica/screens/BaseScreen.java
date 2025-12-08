@@ -18,21 +18,49 @@ import javax.swing.JLabel;
  */
 public class BaseScreen extends JFrame {
 
-    protected void setImageIcon(String fileName, JLabel component) {
-        URL resource = getClass().getClassLoader().getResource("images/" + fileName);
+protected void setImageIcon(String fileName, JLabel component) {
+    URL resource = getClass().getClassLoader().getResource("images/" + fileName);
 
-        if (resource != null) {
-            ImageIcon icon = new ImageIcon(resource);
-            Image imagem = icon.getImage().getScaledInstance(
-                    component.getWidth(), // largura do JLabel
-                    component.getHeight(), // altura do JLabel
-                    Image.SCALE_SMOOTH // suaviza a imagem
-            );
-            component.setIcon(new ImageIcon(imagem));
-        } else {
-            System.err.println("⚠️ Imagem não encontrada em: images/" + fileName);
+    if (resource != null) {
+        ImageIcon icon = new ImageIcon(resource);
+
+        int imgW = icon.getIconWidth();
+        int imgH = icon.getIconHeight();
+
+        int compW = component.getWidth();
+        int compH = component.getHeight();
+
+        // se o componente ainda não tem tamanho, usa a imagem original
+        if (compW <= 0 || compH <= 0) {
+            component.setIcon(icon);
+            return;
         }
+
+        // calcula fator de escala mantendo proporção
+        double escala = Math.min(
+                (double) compW / imgW,
+                (double) compH / imgH
+        );
+
+        // não deixa aumentar além do tamanho original (evita pixelar)
+        if (escala > 1.0) {
+            escala = 1.0;
+        }
+
+        int novoW = (int) (imgW * escala);
+        int novoH = (int) (imgH * escala);
+
+        Image imagem = icon.getImage().getScaledInstance(
+                    novoW,
+                novoH,
+                Image.SCALE_SMOOTH
+        );
+        component.setIcon(new ImageIcon(imagem));
+    } else {
+        System.err.println("⚠️ Imagem não encontrada em: images/" + fileName);
     }
+}
+
 
     /**
      * Ajusta a largura da janela para a largura total da tela, mantendo a

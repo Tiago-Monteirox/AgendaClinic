@@ -18,7 +18,6 @@ public abstract class Pessoa extends BaseEntity {
 @Override
 public void validar() throws ValidationException {
     Validators.notBlank(nome, "Nome");
-    Validators.cpf(cpf);
     Validators.notBlank(telefone,"Telefone");
 }   
     

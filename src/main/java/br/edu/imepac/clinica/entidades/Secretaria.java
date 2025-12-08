@@ -47,6 +47,11 @@ public class Secretaria extends Pessoa {
     public void setSetor(String setor) {
         this.setor = setor;
     }
+
+    @Override
+    public String toString() {
+        return getNome() + "(ID: " + getId() + ")";
+}
     
 }
 

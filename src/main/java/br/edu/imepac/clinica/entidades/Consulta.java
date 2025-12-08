@@ -1,50 +1,44 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package br.edu.imepac.clinica.entidades;
+
+import br.edu.imepac.clinica.enums.EnumStatusConsulta;
 import br.edu.imepac.clinica.exceptions.ValidationException;
+import br.edu.imepac.clinica.utils.Validators;
 
 import java.time.LocalDateTime;
 
-/**
- *
- * @author tiago-monteiro
- */
 public class Consulta extends BaseEntity {
-    
+
     private LocalDateTime dataHora;
     private boolean retorno;
     private String carteiraConvenio;
     private String observacao;
-    private String status;
+    private String status; // AGENDADA, REALIZADA, CANCELADA
+
     private Paciente paciente;
     private Medico medico;
     private Convenio convenio;
-    
-   @Override
+
+    @Override
     public void validar() throws ValidationException {
         if (dataHora == null) {
-            throw new ValidationException("Data e hora da consulta são obrigatórias");
-        }
-        if (paciente == null) {
-            throw new ValidationException("Paciente é obrigatório");
-        }
-        paciente.validar();
-
-        if (medico == null) {
-            throw new ValidationException("Médico é obrigatório");
-        }
-        medico.validar();
-
-        if (!medico.isAtivo()) {
-            throw new ValidationException("Médico está inativo");
+            throw new ValidationException("Data/hora da consulta é obrigatória.");
         }
 
-        if (convenio != null && !convenio.isAtivo()) {
-            throw new ValidationException("Convênio selecionado está inativo");
+        if (paciente == null || paciente.getId() == null) {
+            throw new ValidationException("Paciente é obrigatório.");
         }
+
+        if (medico == null || medico.getId() == null) {
+            throw new ValidationException("Médico é obrigatório.");
+        }
+
+        // convênio pode ser opcional, então aqui só valida se seu negócio exigir
+        // if (convenio == null || convenio.getId() == null) { ... }
+
+        Validators.notBlank(status, "Status da consulta");
     }
+
+    // ===== getters e setters =====
 
     public LocalDateTime getDataHora() {
         return dataHora;
@@ -108,5 +102,17 @@ public class Consulta extends BaseEntity {
 
     public void setConvenio(Convenio convenio) {
         this.convenio = convenio;
+    }
+
+    // ===== integração com EnumStatusConsulta =====
+
+    public EnumStatusConsulta getStatusEnum() {
+        return EnumStatusConsulta.fromString(status);
+    }
+
+    public void setStatusEnum(EnumStatusConsulta statusEnum) {
+        if (statusEnum != null) {
+            this.status = statusEnum.name();
+        }
     }
 }

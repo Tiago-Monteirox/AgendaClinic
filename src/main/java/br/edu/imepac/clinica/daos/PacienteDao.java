@@ -214,4 +214,52 @@ public class PacienteDao extends BaseDao implements GenericDao<Paciente> {
         }
         return atualizar(paciente);
     }
+    
+ 
+   public List<Paciente> buscarPorNome(String nome) throws SQLException {
+    String sql = "SELECT * FROM paciente WHERE nome LIKE ?";
+    Connection conn = null;
+    PreparedStatement stmt = null;
+    ResultSet rs = null;
+
+    List<Paciente> lista = new ArrayList<>();
+
+    try {
+        conn = getConnection();
+        stmt = conn.prepareStatement(sql);
+        stmt.setString(1, "%" + nome + "%");
+        rs = stmt.executeQuery();
+
+        while (rs.next()) {
+            lista.add(mapearPaciente(rs));
+        }
+        return lista;
+
+    } finally {
+        fecharRecursos(conn, stmt, rs);
+    }
+}
+
+public Paciente buscarPorCpf(String cpf) throws SQLException {
+    String sql = "SELECT * FROM paciente WHERE cpf = ?";
+    Connection conn = null;
+    PreparedStatement stmt = null;
+    ResultSet rs = null;
+
+    try {
+        conn = getConnection();
+        stmt = conn.prepareStatement(sql);
+        stmt.setString(1, cpf);
+        rs = stmt.executeQuery();
+
+        if (rs.next()) {
+            return mapearPaciente(rs);
+        }
+        return null;
+
+    } finally {
+        fecharRecursos(conn, stmt, rs);
+    }
+}
+
 }

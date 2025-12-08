@@ -46,5 +46,14 @@ public class Especialidade extends BaseEntity{
     public void setDescricao(String descricao) {
         this.descricao = descricao;
     }
+    
+@Override
+public String toString() {
+    return nome;
+}
+
+    public void setAtivo(boolean aBoolean) {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
 
 }

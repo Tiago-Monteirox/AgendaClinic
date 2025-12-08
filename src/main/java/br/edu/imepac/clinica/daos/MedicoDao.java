@@ -181,4 +181,28 @@ public class MedicoDao extends BaseDao implements GenericDao<Medico> {
         }
         return atualizar(medico);
     }
+
+    public boolean existeConsultaPorMedico(Long id) {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+    
+    // dentro de MedicoDao
+public boolean existeMedicoParaEspecialidade(Long especialidadeId) throws SQLException {
+    String sql = "SELECT 1 FROM medico WHERE especialidade_id = ? LIMIT 1";
+
+    Connection conn = null;
+    PreparedStatement stmt = null;
+    ResultSet rs = null;
+
+    try {
+        conn = getConnection();
+        stmt = conn.prepareStatement(sql);
+        stmt.setLong(1, especialidadeId);
+        rs = stmt.executeQuery();
+        return rs.next();
+    } finally {
+        fecharRecursos(conn, stmt, rs);
+    }
+}
+
 }
